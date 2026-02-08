@@ -7,8 +7,8 @@ import urllib.parse
 
 # --- CONFIGURAÇÃO ---
 # AQUI ESTÁ A MÁGICA: Peguei seu link de compartilhamento e mudei o final para /export?format=csv
-# Isso força o Google a entregar os dados puros para o site.
-URL_CSV = "https://docs.google.com/spreadsheets/d/1X0a6gD1RkVw-p1JqRxdZx3cQTS-slWRmp6KzNyuOKGY/export?format=csv"
+# Link usando a API de Visualização (GVIZ) - Funciona melhor para robôs/scripts
+URL_CSV = "https://docs.google.com/spreadsheets/d/1X0a6gD1RkVw-p1JqRxdZx3cQTS-slWRmp6KzNyuOKGY/gviz/tq?tqx=out:csv"
 
 st.set_page_config(page_title="Encontre seu LifeGroup", page_icon="📍", layout="centered")
 
