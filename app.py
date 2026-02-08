@@ -6,8 +6,9 @@ import re
 import urllib.parse
 
 # --- CONFIGURAÇÃO ---
-# Link direto do CSV (O método mais seguro e rápido para o Streamlit)
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9t9g0-lJTUulzKAXxRCjD4faGfgo79q3dgaECdQsM_1Q0riRt32mB14GXFdfxCaZ4HtJcwZ5dWlR/pub?gid=0&single=true&output=csv"
+# AQUI ESTÁ A MÁGICA: Peguei seu link de compartilhamento e mudei o final para /export?format=csv
+# Isso força o Google a entregar os dados puros para o site.
+URL_CSV = "https://docs.google.com/spreadsheets/d/1X0a6gD1RkVw-p1JqRxdZx3cQTS-slWRmp6KzNyuOKGY/export?format=csv"
 
 st.set_page_config(page_title="Encontre seu LifeGroup", page_icon="📍", layout="centered")
 
@@ -60,7 +61,7 @@ def carregar_dados():
         df['lon'] = longitudes
         return df.dropna(subset=['lat', 'lon'])
     except Exception as e:
-        st.error(f"Erro ao carregar dados. Verifique se a planilha está publicada como CSV. Detalhe: {e}")
+        st.error(f"Erro ao carregar dados. Verifique se a planilha está compartilhada como 'Qualquer pessoa com o link'. Detalhe: {e}")
         return pd.DataFrame()
 
 def obter_lat_lon_usuario(endereco):
