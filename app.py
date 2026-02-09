@@ -184,7 +184,7 @@ df_geral = carregar_dados()
 
 # --- INTERFACE ---
 # Se você subiu o arquivo logo.png no GitHub, descomente a linha abaixo:
-# st.image("logo.png", width=200) 
+st.image("logo_menor.png", width=200) 
 
 st.title("Encontre seu LifeGroup")
 st.markdown("**Paz Church São Paulo**")
