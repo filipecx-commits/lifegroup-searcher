@@ -8,16 +8,16 @@ import urllib.parse
 # --- CONFIGURAÇÃO ---
 URL_CSV = "Cadastro dos Lifegroups.csv"
 
-# Configuração da Página com identidade Azul
+# Configuração da Página
 st.set_page_config(page_title="LifeGroups | Paz São Paulo", page_icon="💙", layout="centered")
 
-# --- ESTILOS CSS (IDENTIDADE VISUAL PAZ CHURCH - AZUL) ---
+# --- ESTILOS CSS (AZUL PAZ SP) ---
 st.markdown("""
 <style>
-    /* Botão de Buscar - Azul Paz Church */
+    /* Botão de Buscar */
     div.stButton > button:first-child {
         width: 100%;
-        background-color: #1C355E; /* Azul Marinho do Logo */
+        background-color: #1C355E;
         color: white;
         border-radius: 8px;
         padding: 0.6rem 1rem;
@@ -29,32 +29,43 @@ st.markdown("""
         transition: 0.3s;
     }
     div.stButton > button:hover {
-        background-color: #162a4a; /* Azul mais escuro no hover */
+        background-color: #162a4a;
         box-shadow: 0px 6px 8px rgba(0,0,0,0.2);
         color: white;
     }
     
-    /* Títulos e Textos */
+    /* Textos */
     .filter-label {
         font-weight: 600;
         font-size: 14px;
-        color: #1C355E; /* Azul nos títulos dos filtros */
+        color: #1C355E;
         margin-bottom: 5px;
     }
     
-    h1 {
-        color: #1C355E; /* Título Azul */
-        font-family: 'Helvetica', sans-serif;
-    }
+    h1 { color: #1C355E; font-family: 'Helvetica', sans-serif; }
     
-    h3 {
-        color: #333;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        font-weight: bold;
+    /* Abas */
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: #f0f2f6;
+        border-radius: 5px;
         color: #1C355E;
+        font-weight: bold;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #1C355E;
+        color: white;
+    }
+    
+    /* Box de Confirmação de Endereço */
+    .address-box {
+        background-color: #e8f4fd;
+        border-left: 5px solid #1C355E;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -98,7 +109,7 @@ def carregar_dados():
         df.columns = df.columns.str.strip()
         df = df.dropna(subset=['Nome do Life'])
         
-        geolocator = Nominatim(user_agent="app_paz_v11_blue")
+        geolocator = Nominatim(user_agent="app_paz_v14_final")
         latitudes = []
         longitudes = []
         
@@ -124,7 +135,7 @@ def carregar_dados():
         return pd.DataFrame()
 
 def obter_lat_lon_usuario(endereco):
-    geolocator = Nominatim(user_agent="app_paz_user_v11")
+    geolocator = Nominatim(user_agent="app_paz_user_v14")
     try:
         query = f"{endereco}, São Paulo, Brasil"
         loc = geolocator.geocode(query)
@@ -137,7 +148,7 @@ def obter_lat_lon_usuario(endereco):
     except:
         return None, None, None
 
-def exibir_cartoes(dataframe, nome_usuario):
+def exibir_cartoes(dataframe, nome_usuario, is_online=False):
     for index, row in dataframe.iterrows():
         with st.container():
             st.markdown("---")
@@ -146,9 +157,13 @@ def exibir_cartoes(dataframe, nome_usuario):
             bairro = row['Bairro'] if 'Bairro' in row else "Região não informada"
             
             with c1:
-                # Título do Life com cor Azul
                 st.markdown(f"### 💙 {row['Nome do Life']}")
-                st.write(f"📍 **{bairro}** ({row['distancia']:.1f} km)")
+                
+                if is_online:
+                    st.write("📍 **Life Online** (Sem fronteiras 🌎)")
+                else:
+                    st.write(f"📍 **{bairro}** ({row['distancia']:.1f} km)")
+                
                 st.caption(f"{row['Tipo de Life']} | {row['Modo']}")
                 st.write(f"📅 {row['Dia da Semana']} às {row['Horário de Início']}")
                 
@@ -157,7 +172,6 @@ def exibir_cartoes(dataframe, nome_usuario):
                 lider = row['Líderes']
                 
                 if tel_lider:
-                    # Textos Humanizados
                     msg1 = f"Olá {lider}, sou {nome_usuario}. Encontrei seu LifeGroup no site da Paz e gostaria de conhecer! Quando será o próximo encontro?"
                     link1 = f"https://wa.me/{tel_lider}?text={urllib.parse.quote(msg1)}"
                     
@@ -167,7 +181,7 @@ def exibir_cartoes(dataframe, nome_usuario):
                     st.markdown(f"""
                     <a href="{link1}" target="_blank" style="text-decoration:none;">
                         <div style="background-color:#25D366;color:white;padding:10px;border-radius:6px;text-align:center;font-weight:bold;margin-bottom:8px;font-size:14px;box-shadow: 0px 2px 4px rgba(0,0,0,0.1);">
-                            💬 Quero Visitar
+                            💬 Quero Participar
                         </div>
                     </a>
                     <a href="{link2}" target="_blank" style="text-decoration:none;">
@@ -183,8 +197,14 @@ def exibir_cartoes(dataframe, nome_usuario):
 df_geral = carregar_dados()
 
 # --- INTERFACE ---
-# Se você subiu o arquivo logo.png no GitHub, descomente a linha abaixo:
-st.image("logo_menor.png", width=200) 
+
+# 1. LOGO (Atualizado para logo_menor.png)
+# Se o arquivo não existir no GitHub ainda, o Streamlit pode mostrar um ícone de "imagem quebrada".
+# Assim que você subir o arquivo 'logo_menor.png', ele aparece.
+try:
+    st.image("logo_menor.png", width=150) 
+except:
+    st.write("") # Se der erro na imagem, não quebra o site
 
 st.title("Encontre seu LifeGroup")
 st.markdown("**Paz Church São Paulo**")
@@ -202,7 +222,6 @@ if not df_geral.empty:
     if 'Modo' in df_geral.columns:
         opcoes_modo = sorted(df_geral['Modo'].unique().tolist())
 
-# --- FORMULÁRIO ---
 with st.form("form_busca"):
     st.markdown("### 1. Seus Dados")
     col1, col2 = st.columns(2)
@@ -231,11 +250,9 @@ with st.form("form_busca"):
         filtro_modo = st.multiselect("Selecione:", options=opcoes_modo, default=opcoes_modo, label_visibility="collapsed")
     
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # O CSS lá em cima vai deixar este botão AZUL
     buscar = st.form_submit_button("🚀 BUSCAR GRUPOS")
 
-# --- LÓGICA ---
+# --- LÓGICA DE BUSCA ---
 if buscar:
     if not nome or not whatsapp or not endereco_usuario:
         st.warning("⚠️ Preencha nome, whatsapp e endereço.")
@@ -257,26 +274,51 @@ if buscar:
                 lat_user, lon_user, endereco_bonito = obter_lat_lon_usuario(endereco_usuario)
                 
                 if lat_user:
-                    st.success(f"📍 Base: **{endereco_bonito}**")
-                    
-                    user_loc = (lat_user, lon_user)
-                    df_filtrado['distancia'] = df_filtrado.apply(
-                        lambda row: geodesic(user_loc, (row['lat'], row['lon'])).km, axis=1
+                    # FEEDBACK MELHORADO (Azul)
+                    st.info(
+                        f"📍 **Localização de Referência:** {endereco_bonito}\n\n"
+                        "Usamos este endereço para calcular a distância. "
+                        "**Não é aqui?** Edite o campo de endereço acima e busque novamente."
                     )
                     
-                    df_ordenado = df_filtrado.sort_values(by='distancia')
+                    df_online = df_filtrado[df_filtrado['Modo'].astype(str).str.contains("Online", case=False, na=False)]
+                    df_presencial = df_filtrado[~df_filtrado['Modo'].astype(str).str.contains("Online", case=False, na=False)]
                     
-                    top3 = df_ordenado.head(3)
-                    resto = df_ordenado.iloc[3:10]
-                    
-                    st.markdown("### 👇 Melhores Opções:")
-                    
-                    exibir_cartoes(top3, nome)
-                    
-                    if not resto.empty:
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        with st.expander(f"➕ Ver mais {len(resto)} opções na região..."):
-                            exibir_cartoes(resto, nome)
+                    if not df_presencial.empty and not df_online.empty:
+                        tab_presencial, tab_online = st.tabs(["📍 Perto de Você", "💻 Online"])
+                        
+                        with tab_presencial:
+                            user_loc = (lat_user, lon_user)
+                            df_presencial['distancia'] = df_presencial.apply(
+                                lambda row: geodesic(user_loc, (row['lat'], row['lon'])).km, axis=1
+                            )
+                            df_sorted = df_presencial.sort_values(by='distancia')
                             
+                            exibir_cartoes(df_sorted.head(3), nome, is_online=False)
+                            
+                            if len(df_sorted) > 3:
+                                with st.expander(f"➕ Ver mais {len(df_sorted)-3} presenciais..."):
+                                    exibir_cartoes(df_sorted.iloc[3:], nome, is_online=False)
+
+                        with tab_online:
+                            st.info("💡 Lifegroups Online não dependem de distância. Mostrando todos disponíveis:")
+                            exibir_cartoes(df_online, nome, is_online=True)
+
+                    elif not df_presencial.empty:
+                        st.markdown("### 👇 Melhores Opções Perto de Você:")
+                        user_loc = (lat_user, lon_user)
+                        df_presencial['distancia'] = df_presencial.apply(
+                            lambda row: geodesic(user_loc, (row['lat'], row['lon'])).km, axis=1
+                        )
+                        df_sorted = df_presencial.sort_values(by='distancia')
+                        exibir_cartoes(df_sorted.head(3), nome, is_online=False)
+                        if len(df_sorted) > 3:
+                            with st.expander(f"➕ Ver mais {len(df_sorted)-3} opções..."):
+                                exibir_cartoes(df_sorted.iloc[3:], nome, is_online=False)
+
+                    elif not df_online.empty:
+                        st.markdown("### 👇 Opções Online Disponíveis:")
+                        exibir_cartoes(df_online, nome, is_online=True)
+                        
                 else:
-                    st.error("Endereço não encontrado.")
+                    st.error("Endereço não encontrado. Tente ser mais específico.")
