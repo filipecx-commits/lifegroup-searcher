@@ -8,16 +8,16 @@ import urllib.parse
 # --- CONFIGURAÇÃO ---
 URL_CSV = "Cadastro dos Lifegroups.csv"
 
-# Configuração da Página com o Título da Igreja
-st.set_page_config(page_title="LifeGroups | Paz São Paulo", page_icon="🧡", layout="centered")
+# Configuração da Página com identidade Azul
+st.set_page_config(page_title="LifeGroups | Paz São Paulo", page_icon="💙", layout="centered")
 
-# --- ESTILOS CSS (IDENTIDADE VISUAL PAZ CHURCH) ---
+# --- ESTILOS CSS (IDENTIDADE VISUAL PAZ CHURCH - AZUL) ---
 st.markdown("""
 <style>
-    /* Botão de Buscar - Laranja da Paz Church */
+    /* Botão de Buscar - Azul Paz Church */
     div.stButton > button:first-child {
         width: 100%;
-        background-color: #ff6600; /* Laranja Paz */
+        background-color: #1C355E; /* Azul Marinho do Logo */
         color: white;
         border-radius: 8px;
         padding: 0.6rem 1rem;
@@ -29,29 +29,32 @@ st.markdown("""
         transition: 0.3s;
     }
     div.stButton > button:hover {
-        background-color: #e65c00; /* Laranja mais escuro no hover */
+        background-color: #162a4a; /* Azul mais escuro no hover */
         box-shadow: 0px 6px 8px rgba(0,0,0,0.2);
         color: white;
     }
     
-    /* Títulos dos filtros */
+    /* Títulos e Textos */
     .filter-label {
         font-weight: 600;
         font-size: 14px;
-        color: #333;
+        color: #1C355E; /* Azul nos títulos dos filtros */
         margin-bottom: 5px;
     }
     
-    /* Ajuste de Títulos */
     h1 {
-        color: #ff6600; /* Título Laranja */
+        color: #1C355E; /* Título Azul */
         font-family: 'Helvetica', sans-serif;
     }
     
-    /* Expander mais discreto */
+    h3 {
+        color: #333;
+    }
+    
+    /* Expander */
     .streamlit-expanderHeader {
         font-weight: bold;
-        color: #555;
+        color: #1C355E;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -95,7 +98,7 @@ def carregar_dados():
         df.columns = df.columns.str.strip()
         df = df.dropna(subset=['Nome do Life'])
         
-        geolocator = Nominatim(user_agent="app_paz_v10")
+        geolocator = Nominatim(user_agent="app_paz_v11_blue")
         latitudes = []
         longitudes = []
         
@@ -121,7 +124,7 @@ def carregar_dados():
         return pd.DataFrame()
 
 def obter_lat_lon_usuario(endereco):
-    geolocator = Nominatim(user_agent="app_paz_user_v10")
+    geolocator = Nominatim(user_agent="app_paz_user_v11")
     try:
         query = f"{endereco}, São Paulo, Brasil"
         loc = geolocator.geocode(query)
@@ -143,8 +146,8 @@ def exibir_cartoes(dataframe, nome_usuario):
             bairro = row['Bairro'] if 'Bairro' in row else "Região não informada"
             
             with c1:
-                # Nome do Life com cor destaque se quiser, ou preto padrão
-                st.markdown(f"### 🧡 {row['Nome do Life']}")
+                # Título do Life com cor Azul
+                st.markdown(f"### 💙 {row['Nome do Life']}")
                 st.write(f"📍 **{bairro}** ({row['distancia']:.1f} km)")
                 st.caption(f"{row['Tipo de Life']} | {row['Modo']}")
                 st.write(f"📅 {row['Dia da Semana']} às {row['Horário de Início']}")
@@ -168,7 +171,7 @@ def exibir_cartoes(dataframe, nome_usuario):
                         </div>
                     </a>
                     <a href="{link2}" target="_blank" style="text-decoration:none;">
-                        <div style="background-color:#444;color:white;padding:10px;border-radius:6px;text-align:center;font-weight:bold;font-size:14px;box-shadow: 0px 2px 4px rgba(0,0,0,0.1);">
+                        <div style="background-color:#1C355E;color:white;padding:10px;border-radius:6px;text-align:center;font-weight:bold;font-size:14px;box-shadow: 0px 2px 4px rgba(0,0,0,0.1);">
                             📞 Peça p/ Ligar
                         </div>
                     </a>
@@ -180,8 +183,10 @@ def exibir_cartoes(dataframe, nome_usuario):
 df_geral = carregar_dados()
 
 # --- INTERFACE ---
-# Título com Emoji Laranja
-st.title("Encontre seu LifeGroup 🧡")
+# Se você subiu o arquivo logo.png no GitHub, descomente a linha abaixo:
+# st.image("logo.png", width=200) 
+
+st.title("Encontre seu LifeGroup")
 st.markdown("**Paz Church São Paulo**")
 st.write("Preencha seus dados abaixo para encontrar a célula mais próxima.")
 
@@ -227,7 +232,7 @@ with st.form("form_busca"):
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # O CSS lá em cima vai deixar este botão Laranja
+    # O CSS lá em cima vai deixar este botão AZUL
     buscar = st.form_submit_button("🚀 BUSCAR GRUPOS")
 
 # --- LÓGICA ---
@@ -261,7 +266,6 @@ if buscar:
                     
                     df_ordenado = df_filtrado.sort_values(by='distancia')
                     
-                    # Top 3 e Resto
                     top3 = df_ordenado.head(3)
                     resto = df_ordenado.iloc[3:10]
                     
@@ -271,7 +275,6 @@ if buscar:
                     
                     if not resto.empty:
                         st.markdown("<br>", unsafe_allow_html=True)
-                        # Texto do expansor ajustado
                         with st.expander(f"➕ Ver mais {len(resto)} opções na região..."):
                             exibir_cartoes(resto, nome)
                             
